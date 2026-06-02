@@ -1,0 +1,42 @@
+@model IEnumerable<BookViewModel>
+@{
+    ViewData["Title"] = "Books";
+}
+
+<h1>Books</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Year</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.AuthorName</td>
+                <td>@book.Year</td>
+                <td>@book.Price.ToString("C")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@book.Id" class="btn btn-sm btn-info">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3>Live data (loaded via AJAX from the Web API)</h3>
+<button id="loadBooks" class="btn btn-primary">Load books from API</button>
+<ul id="apiBooks" class="list-group mt-2"></ul>
+
+@section Scripts {
+    <script src="~/js/books.js"></script>
+}

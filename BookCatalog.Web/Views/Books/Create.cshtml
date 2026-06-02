@@ -1,0 +1,11 @@
+@model BookViewModel
+@{ ViewData["Title"] = "Add Book"; }
+<h1>Add Book</h1>
+<form asp-action="Create" method="post">
+    @* This token + [ValidateAntiForgeryToken] on the action = CSRF protection *@
+    @Html.AntiForgeryToken()
+    <partial name="_BookForm" model="Model" />
+    <button type="submit" class="btn btn-success">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

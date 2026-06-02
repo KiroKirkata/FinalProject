@@ -1,0 +1,4 @@
+@{ ViewData["Title"] = $"Error {ViewBag.Code}"; }
+<h1 class="text-danger">Error @ViewBag.Code</h1>
+<p>@ViewBag.Message</p>
+<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Go home</a>
