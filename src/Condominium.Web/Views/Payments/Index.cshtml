@@ -1,0 +1,10 @@
+@model IReadOnlyList<PaymentViewModel>
+@{ ViewData["Title"] = "Плащания"; }
+<h1>Плащания</h1>
+<p>Преглед на примерните постъпления. Въвеждането и автоматичното разпределение предстоят.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Сграда</th><th>Апартамент</th><th>Дата UTC</th><th>Сума</th><th>Основание</th></tr></thead>
+<tbody>@foreach (var row in Model) {
+<tr><td>@row.Building</td><td>@row.Apartment</td><td>@row.PaidAt.UtcDateTime.ToString("dd.MM.yyyy HH:mm")</td><td>@row.Amount.ToString("F2") @row.Currency</td><td>@row.Reference</td></tr>
+}</tbody></table></div>
+@if (Model.Count == 0) { <p>Няма достъпни плащания.</p> }

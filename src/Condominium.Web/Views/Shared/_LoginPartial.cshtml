@@ -1,0 +1,16 @@
+@using Microsoft.AspNetCore.Identity
+@using Condominium.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="account">
+        <span>@User.Identity?.Name</span>
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+            <button type="submit">Изход</button>
+        </form>
+    </div>
+}
+else
+{
+    <a asp-area="Identity" asp-page="/Account/Login">Вход</a>
+}

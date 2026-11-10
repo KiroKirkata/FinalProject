@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Condominium.Data/Condominium.Data.csproj" />
+    <ProjectReference Include="../Condominium.Models/Condominium.Models.csproj" />
+  </ItemGroup>
+</Project>

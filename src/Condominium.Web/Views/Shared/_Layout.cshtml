@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] — Етажна собственост</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<header>
+    <a class="brand" asp-controller="Home" asp-action="Index">Етажна собственост</a>
+    <nav aria-label="Основна навигация">
+        <a asp-controller="Apartments" asp-action="Index">Апартаменти</a>
+        <a asp-controller="Fees" asp-action="Index">Задължения</a>
+        <a asp-controller="Payments" asp-action="Index">Плащания</a>
+        <a asp-controller="Issues" asp-action="Index">Сигнали</a>
+        <a asp-controller="Votings" asp-action="Index">Гласувания</a>
+    </nav>
+    <partial name="_LoginPartial" />
+</header>
+<main>
+    @RenderBody()
+</main>
+<footer>Дипломен проект • Първи етап • Кирил Димитров Ламбовски, 12В</footer>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
