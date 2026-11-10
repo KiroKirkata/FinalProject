@@ -1,56 +1,106 @@
-# Book Catalog — ASP.NET Core Learning Slice
+# Система за управление на етажна собственост
 
-A deliberately small ASP.NET Core 8.0 app built to **demonstrate the architecture**
-behind a typical "ASP.NET MVC" course project. It is a vertical slice, not a full
-exam submission — it shows each concept working once, with comments explaining why.
+Дипломен проект на **Кирил Димитров Ламбовски, 12В клас**. Ръководител консултант: **Лечо Лечев**.
 
-## What it demonstrates
+Този пакет обхваща само **първия етап със срок 16.11.2026 г.**: обща концепция, проучване, увод на документацията, скелет на решението и база данни. Работното решение е **Condominium.sln**.
 
-| Concept | Where to look |
+## Съдържание на първия етап
+
+| Изискване | Материал |
 |---|---|
-| Multi-project separation | `BookCatalog.Data` / `.Services` / `.Web` / `.Tests` |
-| EF Core + migrations + seed data | `ApplicationDbContext.cs`, `HasData(...)` |
-| Two related entities (1-to-many) | `Author.cs`, `Book.cs` |
-| Business logic in services | `BookService.cs` (controllers stay thin) |
-| Dependency injection | `Program.cs` `AddScoped<IBookService, BookService>()` |
-| CRUD via MVC controller | `BooksController.cs` + `Views/Books/*` |
-| Web API controller | `BooksApiController.cs` (`/api/books`) |
-| AJAX consuming the API | `wwwroot/js/books.js`, Books `Index.cshtml` |
-| Identity + custom user property | `ApplicationUser.DisplayName` |
-| Admin role + role-gated actions | `SeedData.cs`, `[Authorize(Roles=...)]` |
-| Role-aware navigation | `_Layout.cshtml` |
-| Client + server validation | data annotations + `_ValidationScriptsPartial` |
-| CSRF / XSS protection | `[ValidateAntiForgeryToken]`, `textContent` in JS |
-| TempData messages | `_Layout.cshtml` success alert |
-| Custom error pages | `Home/Error`, `Home/StatusCode` |
-| NUnit unit tests | `BookCatalog.Tests/BookServiceTests.cs` |
+| Обща концепция | [Концепция](docs/01-concept.md) |
+| Приключено проучване | [Анализ на три системи, сравнение, изводи и източници](docs/02-research.md) |
+| Написан увод | [Актуалност, обект, предмет, цел и задачи](docs/03-introduction.md) |
+| Скелет на решението | `Condominium.sln` и четири проекта в `src/` |
+| База данни | Entities, DbContext, `InitialCreate` миграция и `DemoSeeder` в `Condominium.Data` |
+| Достъп за консултанта и рецензента | [Публично хранилище](https://github.com/KiroKirkata/FinalProject); засега без покани за сътрудници по указание на възложителя |
 
-## How to run
+Съществуващите в хранилището `BookCatalog.*` са запазени без промяна като предходен пример. Те не са част от новото решение и не трябва да се стартират за настоящата задача.
 
-> Requires the .NET 8 SDK, Visual Studio 2022 (or `dotnet` CLI), and SQL Server
-> LocalDB. This code was written as a reference and has **not** been compiled in
-> the environment it was generated in — expect to fix a small thing or two as you
-> read through it. That is part of the point: type through it, run it, fix it.
+## Структура
 
-```bash
-# 1. Create the initial migration (run from the solution folder)
-dotnet ef migrations add InitialCreate \
-  --project BookCatalog.Data \
-  --startup-project BookCatalog.Web
-
-# 2. Run — migrations + admin seeding happen automatically at startup
-dotnet run --project BookCatalog.Web
-
-# 3. Run the tests
-dotnet test
+```text
+Condominium.sln
+src/
+  Condominium.Web/       MVC контролери и начални изгледи, Identity, конфигурация
+  Condominium.Services/  Ограничени по потребител заявки за преглед
+  Condominium.Data/      Същности, DbContext, миграция и начални данни
+  Condominium.Models/    Пет модела за изгледите
+docs/                   Концепция, проучване и увод
 ```
 
-Default admin login: `admin@books.local` / `Admin123!`
+Петте предметни страници — апартаменти, начисления, плащания, сигнали и гласувания — са начални прегледи на данните. Не са реализирани генериране на такси, въвеждане и разпределяне на плащания, обработка на сигнали, подаване на вот или административен CRUD. Те принадлежат на следващите етапи.
 
-## Scope honesty
+## Локално стартиране
 
-This slice intentionally has fewer entities/controllers/pages than a full course
-rubric (which typically wants 4+ entities, 4+ controllers, 10+ views, 70%+
-coverage). It is sized for *understanding*, not for submission. To grow it toward
-a full project: add more entities the same way `Book` was added, give each its own
-service + controller + views, and extend the test project to match.
+Необходими са .NET SDK с поддръжка на `net8.0`, ASP.NET Core 8 runtime и MS SQL Server. На Windows може да се използва SQL Server Express LocalDB. Командите по-долу са за PowerShell от корена на хранилището.
+
+```powershell
+dotnet tool restore
+dotnet restore Condominium.sln
+dotnet build Condominium.sln
+```
+
+Настройките се съхраняват чрез User Secrets на Web проекта. Не записвайте действителната връзка или паролата в `appsettings.json` и Git. Идентификаторът на хранилището за тайни е `FinalProject-Condominium-Stage1`.
+
+```powershell
+# Заменете стойността със своя SQL Server връзка към отделна демо база.
+dotnet user-secrets set 'ConnectionStrings:DefaultConnection' '<вашата SQL Server връзка>' --project src/Condominium.Web
+
+# Паролата трябва да е поне 12 знака, с главни и малки букви, цифра и специален знак.
+$demoPassword = Read-Host 'Парола за трите демо профила' -MaskInput
+dotnet user-secrets set 'Seed:Password' $demoPassword --project src/Condominium.Web
+$demoPassword = $null
+
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet run --project src/Condominium.Web -- --initialize-db
+dotnet run --project src/Condominium.Web
+```
+
+`--initialize-db` прилага съществуващата миграция и зарежда началните данни, след което приключва. Повторното последователно изпълнение не дублира демо записите. Командата е разрешена само в Development и е предназначена за отделна учебна база; не я стартирайте едновременно в няколко процеса. Обикновеното стартиране не променя автоматично схемата и не зарежда данни.
+
+Отворете **https://localhost:7186**. При нужда доверете локалния сертификат с `dotnet dev-certs https --trust`. Входът използва защитена HTTPS бисквитка. Identity е началната стандартна реализация; пълният български интерфейс и клиентските валидации предстоят.
+
+| Профил | Роля | Начален достъп |
+|---|---|---|
+| `resident@demo.invalid` | Resident | Апартамент 1 и неговите данни |
+| `manager@demo.invalid` | Manager | Възложената демо сграда |
+| `admin@demo.invalid` | Administrator | Общ преглед |
+
+Паролата е стойността на `Seed:Password` при първото създаване на профилите. Промяна на настройката след това не променя съществуващите Identity пароли. В подготвената локална среда настройките вече са записани в User Secrets; те не се пренасят с кода. Могат да се прегледат чрез Visual Studio → Manage User Secrets за Web проекта. Регистрация на нов Identity профил не предоставя автоматично предметна роля или апартамент.
+
+## База данни
+
+Началният модел съдържа `Building`, `Apartment`, `Resident`, `BuildingManager`, `Fund`, `Tariff`, `MonthlyFee`, `Payment`, `PaymentAllocation`, `Expense`, `Issue`, `Voting`, `Vote` и `Notification`, както и стандартните Identity таблици с `ApplicationUser`.
+
+Връзката живущ–апартамент е много към много с вид на обитаване и одобрение. Домоуправителят има отделно възлагане към сграда. Финансовите стойности са `decimal(18,2)`, а процентите — `decimal(9,6)`. Начислението е уникално за апартамент и месец; началният модел допуска едно начисление с избрана тарифа за този период. Вотът е уникален за апартамент и гласуване. Съставните външни ключове ограничават смесване на сгради и разпределяне на плащане към чужд апартамент. Изтриването на свързани записи е ограничено за запазване на историята.
+
+Началните данни включват една сграда, три апартамента с общо 100% идеални части, два фонда, три примерни тарифи, три роли и три демо потребителя. Заредени са девет фиксирани начисления за септември–ноември 2026 г., едно частично плащане и неговото разпределение, един сигнал, една учебна анкета и известие. Това са примерни записи, а не изпълнение на бъдещите бизнес алгоритми. Проверки за срок, представителна власт, общ размер на разпределенията и допустимост на тарифата ще бъдат добавени с бизнес услугите.
+
+```powershell
+# Прилагане само на схемата, без начални профили и записи:
+dotnet ef database update --project src/Condominium.Data --startup-project src/Condominium.Web
+
+# Проверка дали моделът и миграцията съвпадат:
+dotnet ef migrations has-pending-model-changes --project src/Condominium.Data --startup-project src/Condominium.Web
+```
+
+## Проверка на първия етап
+
+На 10.11.2026 г. новото решение е компилирано успешно без предупреждения. Миграцията е приложена върху реален SQL Server LocalDB и началните данни са заредени повторно без дублиране. Проверени са ограниченията за повторно начисление, повторен вот, невалидни идеални части, разпределение между различни апартаменти и вот от друга сграда. Проверени са входът за трите роли, петте начални прегледа, пренасочването на анонимен потребител и ограниченият достъп на демо живущия. Това са проверки на скелета; не се заявява завършено тестване или покритие на бъдещата бизнес логика.
+
+## Публикуване на промените
+
+Локалният клон е `stage-1-condominium`. Публичното четене на съществуващото репо е проверено. Качването на новите промени изисква GitHub профил с право за запис в `KiroKirkata/FinalProject`; наличните локални профили върнаха отказ 403. След удостоверяване с упълномощен профил:
+
+```powershell
+git push -u origin stage-1-condominium
+```
+
+## Технически източници
+
+- [Microsoft Learn — SQL Server provider за EF Core](https://learn.microsoft.com/en-us/ef/core/providers/sql-server/)
+- [Microsoft Learn — ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-8.0)
+- [Microsoft Learn — EF Core migrations](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+
+Източниците за сравнителното проучване са посочени в [Глава 1](docs/02-research.md).
